@@ -30,8 +30,13 @@ public class UrlController {
 	}
 
   @GetMapping("/{shortUrl}")
-  public ResponseEntity home(@PathVariable String shortUrl) {
-    return new ResponseEntity<String>("Hello World 2 " + shortUrl, HttpStatus.OK);
+  public ResponseEntity getFullUrl(@PathVariable String shortUrl) {
+    String fullUrl = urlService.getFullUrl(shortUrl);
+    if (fullUrl != null)
+    {
+      return new ResponseEntity<String>(fullUrl, HttpStatus.OK);
+    }
+    return new ResponseEntity<String>("Not found", HttpStatus.NOT_FOUND);
   }
 
   @PostMapping("/shorten")
@@ -49,7 +54,7 @@ public class UrlController {
     }
     catch (Exception e)
     {
-      return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+      return new ResponseEntity<String>(e.getMessage(), HttpStatus.CONFLICT);
     }
   }
 
