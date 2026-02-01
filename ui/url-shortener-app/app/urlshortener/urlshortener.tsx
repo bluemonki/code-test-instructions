@@ -10,6 +10,9 @@ export function UrlShortenr() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
 
+  const apiBaseUrl = 'http://localhost:8080';
+  const uiBaseUrl = 'http://localhost:5173';
+
   // build the form data
   function buildData() {
     let tempCustomAlias = null;
@@ -27,7 +30,7 @@ export function UrlShortenr() {
     console.log("Submitted:", url);
     console.log("pending:", pending);
     
-    fetch("http://localhost:8080/shorten", {
+    fetch( apiBaseUrl + "/shorten", {
       method: "POST",
       headers: {
         "Content-Type": "Application/JSON",
@@ -107,10 +110,10 @@ export function UrlShortenr() {
       { shortUrl &&
         <span className="p-5 border-none">
         <span className="mt-4 font-semibold">Shortened URL:</span>
-        <a href={shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{shortUrl}</a>
+        <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiBaseUrl + '/' + shortUrl}</a>
         <button 
           onClick={() => {
-            navigator.clipboard.writeText(shortUrl);
+            navigator.clipboard.writeText(uiBaseUrl + '/' + shortUrl);
           }}>
 
           <span id="default-icon">
