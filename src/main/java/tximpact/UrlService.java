@@ -21,7 +21,6 @@ class UrlService {
         UrlToShorten result = urlToShorten;
         if (urlToShorten.customAlias != null) 
         {
-            System.out.println("custom alias requested: " + urlToShorten.customAlias);
             // if the custom alias is already taken, but the fullUrl is different, return 404
             if (this.shortUrlsToFullUrls.containsKey(urlToShorten.customAlias)) 
             {
@@ -40,7 +39,6 @@ class UrlService {
         }
         else
         {
-            System.out.println("no custom alias requested");
             if (this.shortUrlsToFullUrls.containsValue(urlToShorten.fullUrl)) 
             {
                 // already exists

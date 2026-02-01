@@ -32,8 +32,6 @@ class ApplicationTests {
 		urlToShorten.setFullUrl("http://example.com");
 
 		ResponseEntity<UrlToShorten> response = this.wrapper.shorten(urlToShorten);
-		System.out.println(response.getBody().fullUrl);
-		System.out.println(response.getBody().shortUrl);
 		assert(response.getStatusCode().is2xxSuccessful());
 	}
 
@@ -96,10 +94,6 @@ class ApplicationTests {
 
 		ResponseEntity<UrlToShorten> response2 = this.wrapper.shorten(urlToShorten2);
 		assert(response2.getStatusCode().is2xxSuccessful());
-		System.out.println("HERE");
-		System.out.println(response1.getBody().shortUrl);
-		System.out.println(response2.getBody().shortUrl);
-
 		assert(response1.getBody().shortUrl != response2.getBody().shortUrl);
 	}
 
