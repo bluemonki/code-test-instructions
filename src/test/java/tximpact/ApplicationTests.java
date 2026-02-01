@@ -3,8 +3,8 @@ package tximpact;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 // may need this later
 class UrlControllerWrapper extends UrlController {
@@ -31,7 +31,9 @@ class ApplicationTests {
 		UrlToShorten urlToShorten = new UrlToShorten();
 		urlToShorten.setFullUrl("http://example.com");
 
-		var response = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response = this.wrapper.shorten(urlToShorten);
+		System.out.println(response.getBody().fullUrl);
+		System.out.println(response.getBody().shortUrl);
 		assert(response.getStatusCode().is2xxSuccessful());
 	}
 
@@ -41,9 +43,9 @@ class ApplicationTests {
 		urlToShorten.setFullUrl("http://example.com");
 		urlToShorten.setCustomAlias("example");
 
-		var response = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response = this.wrapper.shorten(urlToShorten);
 		assert(response.getStatusCode().is2xxSuccessful());
-		assert(response.getBody() == "example");
+		assert(response.getBody().shortUrl == "example");
 	}
 
 	@Test
@@ -52,99 +54,108 @@ class ApplicationTests {
 		urlToShorten.setFullUrl("http://example.com");
 		urlToShorten.setCustomAlias("example");
 		
-		var response = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response = this.wrapper.shorten(urlToShorten);
 		assert(response.getStatusCode().is2xxSuccessful());
-		assert(response.getBody() == "example");
+		assert(response.getBody().shortUrl == "example");
 
 		response = this.wrapper.shorten(urlToShorten);
 		assert(response.getStatusCode().is2xxSuccessful());
-		assert(response.getBody() == "example");
+		assert(response.getBody().shortUrl == "example");
 	}
 
 	@Test
 	void testNonExactDuplicates() {
-		UrlToShorten urlToShorten = new UrlToShorten();
-		urlToShorten.setFullUrl("http://example.com");
-		urlToShorten.setCustomAlias("example");
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		urlToShorten1.setCustomAlias("example");
 
-		var response1 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
 		assert(response1.getStatusCode().is2xxSuccessful());
-		assert(response1.getBody() == "example");
+		assert(response1.getBody().shortUrl == "example");
 
-		urlToShorten.setFullUrl("http://different-example.com");
+		UrlToShorten urlToShorten2 = new UrlToShorten();
+		urlToShorten2.setFullUrl("http://different-example.com");
+		urlToShorten2.setCustomAlias("example");
 
-		var response2 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.shorten(urlToShorten2);
 		assert(response2.getStatusCode() == HttpStatus.CONFLICT);
 
-		assert(response1.getBody() != response2.getBody());
+		assert(response1.getBody().shortUrl != response2.getBody().shortUrl);
 	}
 
 	@Test
 	void testNonCharacters() {
-		UrlToShorten urlToShorten = new UrlToShorten();
-		urlToShorten.setFullUrl("http://example.com");
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
 		
-		var response1 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
 		assert(response1.getStatusCode().is2xxSuccessful());
 
-		urlToShorten.setFullUrl("http://ex-ample.com");
+		UrlToShorten urlToShorten2 = new UrlToShorten();
+		urlToShorten2.setFullUrl("http://ex-ample.com");
 
-		var response2 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.shorten(urlToShorten2);
 		assert(response2.getStatusCode().is2xxSuccessful());
+		System.out.println("HERE");
+		System.out.println(response1.getBody().shortUrl);
+		System.out.println(response2.getBody().shortUrl);
 
-		assert(response1.getBody() != response2.getBody());
+		assert(response1.getBody().shortUrl != response2.getBody().shortUrl);
 	}
 
 	@Test
 	void testMoreNonCharacters() {
-		UrlToShorten urlToShorten = new UrlToShorten();
-		urlToShorten.setFullUrl("http://example.com");
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
 		
-		var response1 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
 		assert(response1.getStatusCode().is2xxSuccessful());
 		
-		urlToShorten.setFullUrl("http://3x-@mp^$;.com");
+		UrlToShorten urlToShorten2 = new UrlToShorten();
+		urlToShorten2.setFullUrl("http://3x-@mp^$;.com");
 
-		var response2 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.shorten(urlToShorten2);
 		assert(response2.getStatusCode().is2xxSuccessful());
 		
-		assert(response1.getBody() != response2.getBody());
+		assert(response1.getBody().shortUrl != response2.getBody().shortUrl);
 	}
 
 	@Test
 	void testGettingShortUrl() {
-		UrlToShorten urlToShorten = new UrlToShorten();
-		urlToShorten.setFullUrl("http://example.com");
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
 
-		var response1 = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
 		assert(response1.getStatusCode().is2xxSuccessful());
 
-		var response2 = this.wrapper.getFullUrl(response1.getBody().toString());
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.getFullUrl(response1.getBody().shortUrl);
 		assert(response2.getStatusCode().is2xxSuccessful());
-		assert(response2.getBody() == "http://example.com");
+		assert(response2.getBody().fullUrl == "http://example.com");
 	}
 
 	@Test
 	void testGettingNonExistantShortUrl() {
-		var response = this.wrapper.getFullUrl("fake");
+		ResponseEntity<UrlToShorten> response = this.wrapper.getFullUrl("fake");
 		assert(response.getStatusCode() == HttpStatus.NOT_FOUND);
 	}
 
 	@Test
 	void testDecodeWithMoreNonCharacters() {
-		UrlToShorten urlToShorten = new UrlToShorten();
-		urlToShorten.setFullUrl("http://example.com");
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
 		
-		var response1Short = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response1Short = this.wrapper.shorten(urlToShorten1);
 		assert(response1Short.getStatusCode().is2xxSuccessful());
-		var response1Full = this.wrapper.getFullUrl(response1Short.getBody().toString());
-		assert(response1Full.getBody() == "http://example.com");
+		ResponseEntity<UrlToShorten> response1Full = this.wrapper.getFullUrl(response1Short.getBody().shortUrl);
+		assert(response1Full.getStatusCode().is2xxSuccessful());
+		assert(response1Full.getBody().fullUrl == "http://example.com");
 
-		urlToShorten.setFullUrl("http://3x-@mp^$;.com");
+		UrlToShorten urlToShorten2 = new UrlToShorten();
+		urlToShorten2.setFullUrl("http://3x-@mp^$;.com");
 
-		var response2Short = this.wrapper.shorten(urlToShorten);
+		ResponseEntity<UrlToShorten> response2Short = this.wrapper.shorten(urlToShorten2);
 		assert(response2Short.getStatusCode().is2xxSuccessful());
-		var response2Full = this.wrapper.getFullUrl(response2Short.getBody().toString());
-		assert(response2Full.getBody() == "http://3x-@mp^$;.com");
+		ResponseEntity<UrlToShorten> response2Full = this.wrapper.getFullUrl(response2Short.getBody().shortUrl);
+		assert(response2Full.getBody().fullUrl == "http://3x-@mp^$;.com");
 	}
 }

@@ -32,10 +32,12 @@ public class UrlController {
   @GetMapping("/{shortUrl}")
   public ResponseEntity<UrlToShorten> getFullUrl(@PathVariable String shortUrl) {
     String fullUrl = urlService.getFullUrl(shortUrl);
+    System.out.println("Short url " + shortUrl + " resolves to " + fullUrl);
     UrlToShorten result = new UrlToShorten();
-    result.fullUrl = fullUrl;
+
     if (fullUrl != null)
     {
+      result.fullUrl = fullUrl;
       return new ResponseEntity<UrlToShorten>(result, HttpStatus.OK);
     }
     return new ResponseEntity<UrlToShorten>(result, HttpStatus.NOT_FOUND);
