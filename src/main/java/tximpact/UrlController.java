@@ -30,31 +30,36 @@ public class UrlController {
 	}
 
   @GetMapping("/{shortUrl}")
-  public ResponseEntity getFullUrl(@PathVariable String shortUrl) {
+  public ResponseEntity<UrlToShorten> getFullUrl(@PathVariable String shortUrl) {
     String fullUrl = urlService.getFullUrl(shortUrl);
+    UrlToShorten result = new UrlToShorten();
+    result.fullUrl = fullUrl;
     if (fullUrl != null)
     {
-      return new ResponseEntity<String>(fullUrl, HttpStatus.OK);
+      return new ResponseEntity<UrlToShorten>(result, HttpStatus.OK);
     }
-    return new ResponseEntity<String>("Not found", HttpStatus.NOT_FOUND);
+    return new ResponseEntity<UrlToShorten>(result, HttpStatus.NOT_FOUND);
   }
 
   @PostMapping("/shorten")
-  public ResponseEntity shorten(@RequestBody UrlToShorten urlToShorten) {
+  public ResponseEntity<UrlToShorten> shorten(@RequestBody UrlToShorten urlToShorten) {
     try 
     {
-      String result = urlService.getExistingShortUrl(urlToShorten);
+      UrlToShorten result = urlService.getExistingShortUrl(urlToShorten);
       
+      System.out.println("result ");
+      // System.out.println(result.shortUrl);
       if (null != result)
       {
-        return new ResponseEntity<String>(urlToShorten.customAlias, HttpStatus.OK);
+        System.out.println("hitting existing");
+        return new ResponseEntity<UrlToShorten>(urlToShorten, HttpStatus.OK);
       }
-
-      return new ResponseEntity<String>(urlService.shortenUrl(urlToShorten), HttpStatus.OK);
+      System.out.println("creating new");
+      return new ResponseEntity<UrlToShorten>(urlService.shortenUrl(urlToShorten), HttpStatus.OK);
     }
     catch (Exception e)
     {
-      return new ResponseEntity<String>(e.getMessage(), HttpStatus.CONFLICT);
+      return new ResponseEntity<UrlToShorten>(urlToShorten, HttpStatus.CONFLICT);
     }
   }
 

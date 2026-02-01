@@ -12,4 +12,6 @@ public class UrlToShorten {
     String fullUrl;
     @JsonProperty("customAlias")
     String customAlias;
+    @JsonProperty("shortUrl")
+    String shortUrl;
 }

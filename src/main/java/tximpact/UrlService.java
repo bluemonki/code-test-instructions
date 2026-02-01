@@ -16,17 +16,20 @@ class UrlService {
     
     public UrlService() {}
 
-    public String getExistingShortUrl( UrlToShorten urlToShorten ) throws Exception
+    public UrlToShorten getExistingShortUrl( UrlToShorten urlToShorten ) throws Exception
     {
+        UrlToShorten result = urlToShorten;
         if (urlToShorten.customAlias != null) 
         {
+            System.out.println("custom alias requested: " + urlToShorten.customAlias);
             // if the custom alias is already taken, but the fullUrl is different, return 404
             if (this.shortUrlsToFullUrls.containsKey(urlToShorten.customAlias)) 
             {
                 if (this.shortUrlsToFullUrls.get(urlToShorten.customAlias).equals(urlToShorten.fullUrl)) 
                 {
                     // exists but is the same
-                    return urlToShorten.customAlias;
+                    result.shortUrl = urlToShorten.customAlias;
+                    return result;
                 } 
                 else
                 {
@@ -37,10 +40,12 @@ class UrlService {
         }
         else
         {
+            System.out.println("no custom alias requested");
             if (this.shortUrlsToFullUrls.containsValue(urlToShorten.fullUrl)) 
             {
                 // already exists
-                return findShortUrlFromFullUrl(urlToShorten);
+                result.shortUrl = findShortUrlFromFullUrl(urlToShorten);
+                return result;
             }
         }
 
@@ -48,17 +53,20 @@ class UrlService {
         return null;
     }
 
-    public String shortenUrl ( UrlToShorten urlToShorten )
+    public UrlToShorten shortenUrl ( UrlToShorten urlToShorten )
     {
+        UrlToShorten result = urlToShorten;
       // add custom alias
       if (urlToShorten.customAlias != null)
       {
         this.shortUrlsToFullUrls.put(urlToShorten.customAlias, urlToShorten.fullUrl);
-        return urlToShorten.customAlias;
+        result.shortUrl = urlToShorten.customAlias;
+        return result;
       }
       String newShortUrl = base62encode(this.shortUrlsToFullUrls.size());
       this.shortUrlsToFullUrls.put(newShortUrl, urlToShorten.fullUrl);
-      return newShortUrl;
+      result.shortUrl = newShortUrl;
+      return result;
     }
 
     public String getFullUrl( String shortUrl )
