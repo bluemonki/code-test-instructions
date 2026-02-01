@@ -6,13 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
+import java.util.ArrayList;
 
 @Service
 class UrlService {
 
     // replace this with SQLite or something later
     protected HashMap<String, String> shortUrlsToFullUrls = new HashMap<String, String>();
+    protected ArrayList<String> deletedUrls = new ArrayList<String>();
     
     public UrlService() {}
 
@@ -21,8 +22,9 @@ class UrlService {
         UrlToShorten result = urlToShorten;
         if (urlToShorten.customAlias != null) 
         {
+            boolean deletedUrl = deletedUrls.contains(urlToShorten.customAlias);
             // if the custom alias is already taken, but the fullUrl is different, return 404
-            if (this.shortUrlsToFullUrls.containsKey(urlToShorten.customAlias)) 
+            if (!deletedUrl && shortUrlsToFullUrls.containsKey(urlToShorten.customAlias)) 
             {
                 if (this.shortUrlsToFullUrls.get(urlToShorten.customAlias).equals(urlToShorten.fullUrl)) 
                 {
@@ -39,11 +41,14 @@ class UrlService {
         }
         else
         {
-            if (this.shortUrlsToFullUrls.containsValue(urlToShorten.fullUrl)) 
+            if (shortUrlsToFullUrls.containsValue(urlToShorten.fullUrl)) 
             {
                 // already exists
                 result.shortUrl = findShortUrlFromFullUrl(urlToShorten);
-                return result;
+                // unless it's deleted
+                if (false == deletedUrls.contains(result.shortUrl)) {
+                    return result;
+                }
             }
         }
 
@@ -54,26 +59,41 @@ class UrlService {
     public UrlToShorten shortenUrl ( UrlToShorten urlToShorten )
     {
         UrlToShorten result = urlToShorten;
-      // add custom alias
-      if (urlToShorten.customAlias != null)
-      {
-        this.shortUrlsToFullUrls.put(urlToShorten.customAlias, urlToShorten.fullUrl);
-        result.shortUrl = urlToShorten.customAlias;
+
+        // add custom alias
+        if (urlToShorten.customAlias != null)
+        {
+            deletedUrls.remove(urlToShorten.customAlias);
+            shortUrlsToFullUrls.put(urlToShorten.customAlias, urlToShorten.fullUrl);
+            result.shortUrl = urlToShorten.customAlias;
+            return result;
+        }
+        else
+        {
+            String newShortUrl = base62encode(this.shortUrlsToFullUrls.size());
+            this.shortUrlsToFullUrls.put(newShortUrl, urlToShorten.fullUrl);
+            result.shortUrl = newShortUrl;
+        }
+        // make sure it's not in the deleted list
+        deletedUrls.remove(result.shortUrl);
         return result;
-      }
-      String newShortUrl = base62encode(this.shortUrlsToFullUrls.size());
-      this.shortUrlsToFullUrls.put(newShortUrl, urlToShorten.fullUrl);
-      result.shortUrl = newShortUrl;
-      return result;
     }
 
     public String getFullUrl( String shortUrl )
     {
-        if (shortUrlsToFullUrls.containsKey(shortUrl)) 
+        boolean deletedUrl = deletedUrls.contains(shortUrl);
+        boolean existingUrl = shortUrlsToFullUrls.containsKey(shortUrl);
+        if ( !deletedUrl && existingUrl )
         {
             return shortUrlsToFullUrls.get(shortUrl);
         }
         return null;
+    }
+
+    public void deleteUrl( String shortUrl )
+    {
+        //shortUrlsToFullUrls.remove(shortUrl);
+        deletedUrls.add(shortUrl);
     }
 
     // helper to search the hashmap

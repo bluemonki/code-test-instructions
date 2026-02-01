@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 // may need this later
@@ -152,4 +153,112 @@ class ApplicationTests {
 		ResponseEntity<UrlToShorten> response2Full = this.wrapper.getFullUrl(response2Short.getBody().shortUrl);
 		assert(response2Full.getBody().fullUrl == "http://3x-@mp^$;.com");
 	}
+
+
+	@Test
+	void deleteExistingUrl() {
+		// create the URL
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+
+		// delete it
+		String shortUrl = response1.getBody().shortUrl;
+
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.deleteUrl(shortUrl);
+		assert(response2.getStatusCode().is2xxSuccessful());
+
+		// try and get it again
+		ResponseEntity<UrlToShorten> response3 = this.wrapper.getFullUrl(shortUrl);
+		assert(response3.getStatusCode() == HttpStatus.NOT_FOUND);
+		assert(response3.getBody().shortUrl == null);
+	}
+
+	@Test
+	void deleteExistingUrlWithCustomAlias() {
+		// create the URL
+		String customAlias = "DELETE_ME";
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		urlToShorten1.setCustomAlias(customAlias);
+		
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+
+		// delete it
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.deleteUrl(customAlias);
+		assert(response2.getStatusCode().is2xxSuccessful());
+		assert(response2.getStatusCode() == HttpStatus.NO_CONTENT);
+
+		// try and get it again
+		ResponseEntity<UrlToShorten> response3 = this.wrapper.getFullUrl(customAlias);
+		assert(response3.getStatusCode() == HttpStatus.NOT_FOUND);
+		assert(response3.getBody().shortUrl == null);
+	}
+
+	@Test
+	void deleteNonExistantUrl() {
+		String shortUrl = "MISSING";
+
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.deleteUrl(shortUrl);
+		assert(response1.getStatusCode() == HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	void createDeleteCreateAgain() {
+		// create the URL
+		String shortUrl = null;
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+		shortUrl = response1.getBody().shortUrl;
+
+		// delete it
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.deleteUrl(shortUrl);
+		assert(response2.getStatusCode().is2xxSuccessful());
+		assert(response2.getStatusCode() == HttpStatus.NO_CONTENT);
+
+		// try and get it again
+		ResponseEntity<UrlToShorten> response3 = this.wrapper.getFullUrl(shortUrl);
+		assert(response3.getStatusCode() == HttpStatus.NOT_FOUND);
+		assert(response3.getBody().shortUrl == null);
+
+		// create it again
+		ResponseEntity<UrlToShorten> response4 = this.wrapper.shorten(urlToShorten1);
+		assert(response4.getStatusCode().is2xxSuccessful());
+		// this should create a different shorturl
+		assert(response4.getBody().shortUrl != shortUrl);
+	}
+
+	@Test
+	void createDeleteCreateAgainCustomAlias() {
+		// create the URL
+		String customAlias = "EXISSTENTIAL";
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		urlToShorten1.setCustomAlias(customAlias);
+		
+		ResponseEntity<UrlToShorten> response1 = this.wrapper.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+
+		// delete it
+		ResponseEntity<UrlToShorten> response2 = this.wrapper.deleteUrl(customAlias);
+		assert(response2.getStatusCode().is2xxSuccessful());
+		assert(response2.getStatusCode() == HttpStatus.NO_CONTENT);
+
+		// try and get it again
+		ResponseEntity<UrlToShorten> response3 = this.wrapper.getFullUrl(customAlias);
+		assert(response3.getStatusCode() == HttpStatus.NOT_FOUND);
+		assert(response3.getBody().shortUrl == null);
+
+		// create it again
+		ResponseEntity<UrlToShorten> response4 = this.wrapper.shorten(urlToShorten1);
+		assert(response4.getStatusCode().is2xxSuccessful());
+		assert(response4.getBody().customAlias == customAlias);
+	}
+		
 }
