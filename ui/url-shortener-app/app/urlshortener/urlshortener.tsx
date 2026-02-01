@@ -9,9 +9,9 @@ export function UrlShortenr() {
   const [shortUrl, setShortUrl] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  const [uiUrl, setUiUrl] = useState('');
 
   const apiBaseUrl = 'http://localhost:8080';
-  const uiBaseUrl = 'http://localhost:5173';
 
   // build the form data
   function buildData() {
@@ -77,10 +77,20 @@ export function UrlShortenr() {
     }
   }
 
+  function setUiBaseUrl() {
+    if (window && window.location) {
+      const host = window.location.host;
+      const protocol = window.location.protocol;
+      setUiUrl(protocol + '//' + host );
+      return true;
+    }
+    return false;
+  }
+
   return (
     
-    <p className="flex flex-col items-center justify-center pt-16 pb-4">
-
+    <div className="flex flex-col items-center justify-center pt-16 pb-4">
+      
       <img src={logo} alt="URL Shortenr Logo" className="block w-64 mb-8"/>
 
       <form onSubmit={handleSubmit}>
@@ -107,13 +117,14 @@ export function UrlShortenr() {
                 value="Shorten URL"
                 disabled={disabled || pending}/>
       </form>
-      { shortUrl &&
+      {uiUrl.length == 0 && setUiBaseUrl()}
+      { shortUrl && 
         <span className="p-5 border-none">
         <span className="mt-4 font-semibold">Shortened URL:</span>
-        <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiBaseUrl + '/' + shortUrl}</a>
+        <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiUrl + '/' + shortUrl}</a>
         <button 
           onClick={() => {
-            navigator.clipboard.writeText(uiBaseUrl + '/' + shortUrl);
+            navigator.clipboard.writeText(uiUrl + '/' + shortUrl);
           }}>
 
           <span id="default-icon">
@@ -130,6 +141,6 @@ export function UrlShortenr() {
           <span className="text-red-500 ml-2">{error}</span>
         </span>
       }
-    </p>
+    </div>
     );
 }
