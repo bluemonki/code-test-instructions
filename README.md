@@ -38,6 +38,13 @@ From the `ui/urlshortener-app` directory run:
 ### Docker
 * Build the dockerfile
   * `docker build --tag urlshortenrui --file Dockerfile .`
-  
+
 * Run the dockerfile
   * `docker container run -d --name ui -p 80:3000 urlshortenrui:latest`
+
+
+## ToDo
+
+* Add some jest tests for the UI
+* Use a database and not a hashmap
+* Captcha
