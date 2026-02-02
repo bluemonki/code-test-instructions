@@ -78,7 +78,7 @@ export function UrlShortenr() {
   }
 
   function setUiBaseUrl() {
-    if (window && window.location) {
+    if (window !== undefined && window.location) {
       const host = window.location.host;
       const protocol = window.location.protocol;
       setUiUrl(protocol + '//' + host );
