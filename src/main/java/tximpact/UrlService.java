@@ -56,9 +56,11 @@ class UrlService {
         return null;
     }
 
-    public UrlToShorten shortenUrl ( UrlToShorten urlToShorten )
+    public UrlToShorten shortenUrl ( UrlToShorten urlToShorten ) throws IllegalArgumentException
     {
         UrlToShorten result = urlToShorten;
+
+        validateFullUrl(urlToShorten.fullUrl);
 
         // add custom alias
         if (urlToShorten.customAlias != null)
@@ -125,6 +127,15 @@ class UrlService {
         }
         return sb.reverse().toString();
     } 
+
+
+    protected void validateFullUrl(String url) throws IllegalArgumentException{
+        // basic validation
+        boolean isValid = url.startsWith("http://") || url.startsWith("https://");
+        if (!isValid) {
+            throw new IllegalArgumentException("Invalid URL format");
+        }
+    }
 
 
 }

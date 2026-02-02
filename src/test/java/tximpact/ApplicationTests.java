@@ -147,7 +147,7 @@ class ApplicationTests {
 
 		UrlToShorten urlToShorten2 = new UrlToShorten();
 		urlToShorten2.setFullUrl("http://3x-@mp^$;.com");
-
+		
 		ResponseEntity<UrlToShorten> response2Short = this.wrapper.shorten(urlToShorten2);
 		assert(response2Short.getStatusCode().is2xxSuccessful());
 		ResponseEntity<UrlToShorten> response2Full = this.wrapper.getFullUrl(response2Short.getBody().shortUrl);
@@ -259,6 +259,15 @@ class ApplicationTests {
 		ResponseEntity<UrlToShorten> response4 = this.wrapper.shorten(urlToShorten1);
 		assert(response4.getStatusCode().is2xxSuccessful());
 		assert(response4.getBody().customAlias == customAlias);
+	}
+
+	@Test
+	void addInvalidUrl() {
+		UrlToShorten urlToShorten = new UrlToShorten();
+		urlToShorten.setFullUrl("htp://example.com");
+
+		ResponseEntity<UrlToShorten> response = this.wrapper.shorten(urlToShorten);
+		assert(response.getStatusCode() == HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 		
 }

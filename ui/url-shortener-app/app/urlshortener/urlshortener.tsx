@@ -42,6 +42,9 @@ export function UrlShortenr() {
         if (response.status === 409) {
           throw new Error("Sorry, URL is already taken.");
         }
+        else if (response.status === 422) {
+          throw new Error("URL should be valid (start with 'http://' or 'https://').");
+        }
         else {
           throw new Error("HTTP error " + response.status);
         }

@@ -42,6 +42,10 @@ public class UrlController {
       }
       return new ResponseEntity<UrlToShorten>(urlService.shortenUrl(urlToShorten), HttpStatus.OK);
     }
+    catch (IllegalArgumentException iae)
+    {
+      return new ResponseEntity<UrlToShorten>(urlToShorten, HttpStatus.UNPROCESSABLE_CONTENT);
+    }
     catch (Exception e)
     {
       return new ResponseEntity<UrlToShorten>(urlToShorten, HttpStatus.CONFLICT);
