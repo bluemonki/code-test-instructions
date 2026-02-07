@@ -1,4 +1,4 @@
-# UrlShortenr
+# UrlShortenR
 
 ## Requirements
 * Java 17
