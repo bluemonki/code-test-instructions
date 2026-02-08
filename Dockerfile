@@ -1,4 +1,5 @@
 FROM amazoncorretto:17-alpine-jdk
+VOLUME /data
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 EXPOSE 8080

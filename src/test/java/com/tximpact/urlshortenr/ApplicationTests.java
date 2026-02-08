@@ -46,6 +46,27 @@ class ApplicationTests {
 
 	@Test
 	void testExactDuplicates() {
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+
+		ResponseEntity<UrlToShorten> response1 = this.urlController.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+
+		String shortUrl1 = response1.getBody().getShortUrl();
+
+		UrlToShorten urlToShorten2= new UrlToShorten();
+		urlToShorten2.setFullUrl("http://example.com");
+
+		ResponseEntity<UrlToShorten> response2  = this.urlController.shorten(urlToShorten2);
+		assert(response2.getStatusCode().is2xxSuccessful());
+
+		String shortUrl2 = response2.getBody().getShortUrl();
+
+		assert (shortUrl1.equals(shortUrl2));
+	}
+
+	@Test
+	void testExactDuplicatesCustomAlias() {
 		UrlToShorten urlToShorten = new UrlToShorten();
 		urlToShorten.setFullUrl("http://example.com");
 		urlToShorten.setCustomAlias("example");
@@ -57,6 +78,24 @@ class ApplicationTests {
 		response = this.urlController.shorten(urlToShorten);
 		assert(response.getStatusCode().is2xxSuccessful());
 		assert(Objects.equals(Objects.requireNonNull(response.getBody()).getShortUrl(), "example"));
+	}
+
+	@Test
+	void testExactDuplicateCustomAliases() {
+		UrlToShorten urlToShorten1 = new UrlToShorten();
+		urlToShorten1.setFullUrl("http://example.com");
+		urlToShorten1.setCustomAlias("example");
+
+		UrlToShorten urlToShorten2 = new UrlToShorten();
+		urlToShorten2.setFullUrl("http://example2.com");
+		urlToShorten2.setCustomAlias("example");
+
+		ResponseEntity<UrlToShorten> response1 = this.urlController.shorten(urlToShorten1);
+		assert(response1.getStatusCode().is2xxSuccessful());
+		assert(Objects.equals(Objects.requireNonNull(response1.getBody()).getShortUrl(), "example"));
+
+		ResponseEntity<UrlToShorten> response2 = this.urlController.shorten(urlToShorten2);
+		assert(response2.getStatusCode() == HttpStatus.CONFLICT);
 	}
 
 	@Test
@@ -284,5 +323,4 @@ class ApplicationTests {
 		ResponseEntity<UrlToShorten> response = this.urlController.shorten(urlToShorten);
 		assert(response.getStatusCode() == HttpStatus.UNPROCESSABLE_CONTENT);
 	}
-		
 }

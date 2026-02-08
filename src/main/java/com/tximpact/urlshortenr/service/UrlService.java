@@ -20,24 +20,29 @@ public class UrlService {
 
     public UrlToShorten getExistingShortUrl(UrlToShorten urlToShorten ) throws IllegalArgumentException
     {
-        List<UrlToShorten> fullUrlMatches = urlRepository.findByFullUrl(urlToShorten.getFullUrl());
-
-        if (fullUrlMatches.isEmpty())
+        // if we have a custom alias see if there's an
+        // existing match
+        if (urlToShorten.getCustomAlias() != null)
         {
-            // not found
-            return null;
-        }
-
-        List<UrlToShorten> results = fullUrlMatches.stream()
-                .filter( match -> Objects.equals(match.getShortUrl(), urlToShorten.getShortUrl()))
-                .toList();
-        if (null != results.get(0)) {
-            return results.get(0);
+            List<UrlToShorten> matches = urlRepository.findAllByFullUrlAndCustomAlias(urlToShorten.getFullUrl(), urlToShorten.getCustomAlias());
+            if (!matches.isEmpty())
+            {
+                return matches.get(0);
+            }
         }
         else {
-            // exists but is different
-            throw new IllegalArgumentException("Already taken");
+            // otherwise see if there's a match without
+            // a custom alias
+            List<UrlToShorten> fullUrlMatches = urlRepository.findByFullUrl(urlToShorten.getFullUrl());
+
+            for (UrlToShorten match : fullUrlMatches) {
+                if (match.getCustomAlias() == null) {
+                    return match;
+                }
+            }
         }
+        // otherwise not found
+        return null;
     }
 
     @Transactional

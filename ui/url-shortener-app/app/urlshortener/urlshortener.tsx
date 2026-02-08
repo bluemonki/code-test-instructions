@@ -120,8 +120,8 @@ export function UrlShortenr() {
                 value="Shorten URL"
                 disabled={disabled || pending}/>
       </form>
-      {uiUrl.length == 0 && setUiBaseUrl()}
-      { shortUrl && 
+      {uiUrl.length == 0 && typeof window !== 'undefined' && setUiBaseUrl()}
+      { shortUrl && !error &&
         <span className="p-5 border-none">
         <span className="mt-4 font-semibold">Shortened URL:</span>
         <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiUrl + '/' + shortUrl}</a>

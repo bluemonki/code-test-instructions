@@ -14,4 +14,5 @@ public interface UrlRepository
         extends JpaRepository<UrlToShorten, Long> {
     List<UrlToShorten> findByFullUrl(String fullUrl);
     List<UrlToShorten> findByShortUrl(String shortUrl);
+    List<UrlToShorten> findAllByFullUrlAndCustomAlias(String fullUrl, String customAlias);
 }

@@ -34,7 +34,7 @@ public class UrlController {
       
       if (null != result)
       {
-        return new ResponseEntity<>(urlToShorten, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
       }
       return new ResponseEntity<>(urlService.shortenUrl(urlToShorten), HttpStatus.OK);
     }
