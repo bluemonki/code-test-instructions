@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -188,6 +189,23 @@ class ApplicationTests {
 		assert(response2Full.getBody().getFullUrl() == "http://3x-@mp^$;.com");
 	}
 
+	@Test
+	void getAllUrls()
+	{
+		for (int i = 0 ; i < 10 ; i++)
+		{
+			UrlToShorten urlToShorten = new UrlToShorten();
+			urlToShorten.setFullUrl("http://loop" + i + ".com");
+
+			this.urlController.shorten(urlToShorten);
+		}
+
+		ResponseEntity<List<UrlToShorten>> response = this.urlController.getUrls();
+		assert(response.getStatusCode().is2xxSuccessful());
+		List<UrlToShorten> allUrls = response.getBody();
+		assert(allUrls.size()==10);
+	}
+
 
 	@Test
 	void deleteExistingUrl() {
@@ -233,7 +251,7 @@ class ApplicationTests {
 	}
 
 	@Test
-	void deleteNonExistantUrl() {
+	void deleteNonExistentUrl() {
 		String shortUrl = "MISSING";
 
 		ResponseEntity<UrlToShorten> response1 = this.urlController.deleteUrl(shortUrl);

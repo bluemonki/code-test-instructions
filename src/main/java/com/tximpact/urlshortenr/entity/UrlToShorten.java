@@ -15,6 +15,7 @@ public class UrlToShorten {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Long urlId;
     @JsonProperty("fullUrl")
     String fullUrl;

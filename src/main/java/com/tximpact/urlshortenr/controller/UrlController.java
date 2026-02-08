@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 @RestController
 public class UrlController {
 
@@ -46,6 +48,11 @@ public class UrlController {
     {
       return new ResponseEntity<>(urlToShorten, HttpStatus.CONFLICT);
     }
+  }
+
+  @GetMapping("/urls")
+  public ResponseEntity<List<UrlToShorten>> getUrls() {
+    return new ResponseEntity<>(urlService.getAllUrls(), HttpStatus.OK);
   }
 
   @DeleteMapping("/{shortUrl}")

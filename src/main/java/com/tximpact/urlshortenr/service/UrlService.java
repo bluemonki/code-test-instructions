@@ -85,6 +85,10 @@ public class UrlService {
         return matches.get(0).getFullUrl();
     }
 
+    public List<UrlToShorten> getAllUrls() {
+        return urlRepository.findAll();
+    }
+
 //    @Transactional
     public void deleteUrl( String shortUrl )
     {
