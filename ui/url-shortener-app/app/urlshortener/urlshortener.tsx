@@ -1,5 +1,12 @@
 import { use, useState } from 'react';
 import logo from "./logo.png";
+import { shortenUrl, getUrls } from './actions';
+
+interface ShortenedUrl {
+  shortUrl: string;
+  fullUrl: string;
+  customAlias?: string | null;
+}
 
 export function UrlShortenr() {
 
@@ -10,6 +17,10 @@ export function UrlShortenr() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const [uiUrl, setUiUrl] = useState('');
+  const [showUrlList, setShowUrlList] = useState(false);
+  const [urlsList, setUrlsList] = useState<ShortenedUrl[]>([]);
+  const [urlsLoading, setUrlsLoading] = useState(false);
+  const [urlsError, setUrlsError] = useState(null);
 
   const apiBaseUrl = 'http://localhost:8080';
 
@@ -30,27 +41,7 @@ export function UrlShortenr() {
     console.log("Submitted:", url);
     console.log("pending:", pending);
     
-    fetch( apiBaseUrl + "/shorten", {
-      method: "POST",
-      headers: {
-        "Content-Type": "Application/JSON",
-      },
-      body: JSON.stringify(buildData()),
-    })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 409) {
-          throw new Error("Sorry, URL is already taken.");
-        }
-        else if (response.status === 422) {
-          throw new Error("URL should be valid (start with 'http://' or 'https://').");
-        }
-        else {
-          throw new Error("HTTP error " + response.status);
-        }
-      }
-      return response.json();
-    })
+    shortenUrl(apiBaseUrl, buildData())
     .then((data) => {
       console.log(data);
       setShortUrl(data.shortUrl);
@@ -90,13 +81,40 @@ export function UrlShortenr() {
     return false;
   }
 
+  function handleShowAllUrls() {
+    setShowUrlList(true);
+    setUrlsLoading(true);
+    setUrlsError(null);
+    getUrls(apiBaseUrl)
+      .then((data) => {
+        setUrlsList(data);
+        setUrlsLoading(false);
+      })
+      .catch((error) => {
+        setUrlsError(error.message);
+        setUrlsLoading(false);
+      });
+  }
+
+  function handleShortenUrl() {
+    setShowUrlList(false);
+  }
+
   return (
     
     <div className="flex flex-col items-center justify-center pt-16 pb-4">
+      <div className="absolute top-4 left-4">
+        <button
+          onClick={showUrlList ? handleShortenUrl : handleShowAllUrls}
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+        >
+          {showUrlList ? "Shorten a URL" : "Show All URLs"}
+        </button>
+      </div>
       
       <img src={logo} alt="URL Shortenr Logo" className="block w-64 mb-8"/>
 
-      <form onSubmit={handleSubmit}>
+      {!showUrlList && <form onSubmit={handleSubmit}>
         { /* input button for full url */ }
         <input
             placeholder="URL to shorten http://blah.com/long/url"
@@ -119,7 +137,27 @@ export function UrlShortenr() {
                 className="bg-green-500 text-white font-bold py-2 px-4 m-5 rounded mt-4 hover:bg-green-700" 
                 value="Shorten URL"
                 disabled={disabled || pending}/>
-      </form>
+      </form>}
+      
+      {showUrlList && (
+        <div className="p-5 border border-gray-300 rounded shadow-md">
+          <h2 className="text-2xl font-bold mb-4">All Shortened URLs</h2>
+          {urlsLoading && <p className="text-gray-500">Loading...</p>}
+          {urlsError && <p className="text-red-500">Error: {urlsError}</p>}
+          {!urlsLoading && !urlsError && urlsList.length === 0 && <p className="text-gray-500">No URLs found.</p>}
+          {!urlsLoading && !urlsError && urlsList.length > 0 && (
+            <ul className="space-y-2">
+              {urlsList.map((item, index) => (
+                <li key={index} className="p-3 bg-gray-100 rounded">
+                  <div><strong>Short URL:</strong> {item.shortUrl}</div>
+                  <div><strong>Full URL:</strong> {item.fullUrl}</div>
+                  {item.customAlias && <div><strong>Custom Alias:</strong> {item.customAlias}</div>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {uiUrl.length == 0 && typeof window !== 'undefined' && setUiBaseUrl()}
       { shortUrl && !error &&
         <span className="p-5 border-none">
