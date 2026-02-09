@@ -21,7 +21,6 @@ export function UrlForwardr() {
     // call the API on page load
     useEffect( () => {
         if(!fullUrl && !error) {
-            console.log("calling api");
             callApi();
         }
     }, [fullUrl]);
@@ -29,7 +28,6 @@ export function UrlForwardr() {
     // API call
     function callApi() {
         setError(null);
-        console.log("Submitted:", location);
         
         let urlToCall = "http://localhost:8080" + location.pathname;
         
@@ -51,12 +49,10 @@ export function UrlForwardr() {
         return response.json();
         })
         .then((data) => {
-            console.log(data);
             setFullUrl(data.fullUrl);
             setDuration(5);
         })
         .catch((error) => {
-            console.log(error);
             setError(error.message);
         });
     }

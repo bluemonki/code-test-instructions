@@ -8,6 +8,37 @@ interface ShortenedUrl {
   customAlias?: string | null;
 }
 
+interface CopyButtonProps {
+  textToCopy: string;
+  showSuccessIcon?: boolean;
+  className?: string;
+}
+
+const CopyButton = ({ textToCopy, showSuccessIcon = false, className = "" }: CopyButtonProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button 
+      onClick={handleCopy}
+      className={className}>
+      <span id="default-icon" className={copied ? "hidden" : ""}>
+        <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/></svg>
+      </span>
+      {showSuccessIcon && (
+        <span id="success-icon" className={copied ? "" : "hidden"}>
+          <svg className="w-4 h-4 text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 7 2 2 4-4m-5-9v4h4V3h-4Z"/></svg>
+        </span>
+      )}
+    </button>
+  );
+};
+
 export function UrlShortenr() {
 
   const [url, setUrl] = useState("");
@@ -38,16 +69,12 @@ export function UrlShortenr() {
     event.preventDefault();
     setPending(true);
     setError(null);
-    console.log("Submitted:", url);
-    console.log("pending:", pending);
     
     shortenUrl(apiBaseUrl, buildData())
     .then((data) => {
-      console.log(data);
       setShortUrl(data.shortUrl);
     })
     .catch((error) => {
-      console.log(error);
       setError(error.message);
     });
     setPending(false);
@@ -138,6 +165,22 @@ export function UrlShortenr() {
                 value="Shorten URL"
                 disabled={disabled || pending}/>
       </form>}
+
+      {uiUrl.length == 0 && typeof window !== 'undefined' && setUiBaseUrl()}
+      { shortUrl && !error &&
+        <span className="p-5 border-none">
+        <span className="mt-4 font-semibold">Shortened URL:</span>
+        <div className="flex items-center gap-2">
+          <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiUrl + '/' + shortUrl}</a>
+          <CopyButton textToCopy={uiUrl + '/' + shortUrl} showSuccessIcon={true} />
+        </div>
+      </span> }
+      { error && 
+        <span className="p-5 border-none">
+          <span className="mt-4 font-semibold">Error:</span>
+          <span className="text-red-500 ml-2">{error}</span>
+        </span>
+      }
       
       {showUrlList && (
         <div className="p-5 border border-gray-300 rounded shadow-md">
@@ -148,9 +191,12 @@ export function UrlShortenr() {
           {!urlsLoading && !urlsError && urlsList.length > 0 && (
             <ul className="space-y-2">
               {urlsList.map((item, index) => (
-                <li key={index} className="p-3 bg-gray-100 rounded">
-                  <div><strong>Short URL:</strong> {item.shortUrl}</div>
-                  <div><strong>Full URL:</strong> {item.fullUrl}</div>
+                <li key={index} data-testid={`url-item-${item.shortUrl}`} className="p-3 bg-gray-100 rounded">
+                  <div className="flex items-center gap-2">
+                    <div><strong>Short URL:</strong> {uiUrl + '/' + item.shortUrl}</div>
+                    <CopyButton textToCopy={uiUrl + '/' + item.shortUrl} className="p-1 hover:opacity-75" />
+                  </div>
+                  <div><strong>Full URL:</strong> <a href={item.fullUrl} target="_blank" rel="noreferrer" className="text-blue-500 underline">{item.fullUrl}</a></div>
                   {item.customAlias && <div><strong>Custom Alias:</strong> {item.customAlias}</div>}
                 </li>
               ))}
@@ -158,30 +204,7 @@ export function UrlShortenr() {
           )}
         </div>
       )}
-      {uiUrl.length == 0 && typeof window !== 'undefined' && setUiBaseUrl()}
-      { shortUrl && !error &&
-        <span className="p-5 border-none">
-        <span className="mt-4 font-semibold">Shortened URL:</span>
-        <a href={'/' + shortUrl} className="text-blue-500 underline ml-2" target="_blank" rel="noreferrer">{uiUrl + '/' + shortUrl}</a>
-        <button 
-          onClick={() => {
-            navigator.clipboard.writeText(uiUrl + '/' + shortUrl);
-          }}>
-
-          <span id="default-icon">
-              <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 5h6m-6 4h6M10 3v4h4V3h-4Z"/></svg>
-          </span>
-          <span id="success-icon" className="hidden">
-              <svg className="w-4 h-4 text-fg-brand" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-6 7 2 2 4-4m-5-9v4h4V3h-4Z"/></svg>
-          </span>
-        </button>
-      </span> }
-      { error && 
-        <span className="p-5 border-none">
-          <span className="mt-4 font-semibold">Error:</span>
-          <span className="text-red-500 ml-2">{error}</span>
-        </span>
-      }
+      
     </div>
     );
 }
