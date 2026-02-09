@@ -26,12 +26,17 @@ From the root directory:
   * `docker build --tag urlshortenr --file Dockerfile .`
 * Run the dockerfile
   * `docker container run -d --name web1 -p 8080:8080 urlshortenr:latest`
+* Run the dockerfile with a `/data` volume to persist the database
+  * `docker container run -d --name web1 -p 8080:8080 -v /host/path:/data urlshortenr:latest`
 
 ## UI
 
 A react-router based web application
 
 ### Local Running
+Run the unit tests for the UI:
+`npm test`
+
 From the `ui/urlshortener-app` directory run:
 `npm run dev` this will run a local setup on `http://localhost:5173/` and expect to connect to an API running on `localhost:8080`
 
