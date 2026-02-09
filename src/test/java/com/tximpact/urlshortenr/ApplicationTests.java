@@ -341,4 +341,13 @@ class ApplicationTests {
 		ResponseEntity<UrlToShorten> response = this.urlController.shorten(urlToShorten);
 		assert(response.getStatusCode() == HttpStatus.UNPROCESSABLE_CONTENT);
 	}
+
+	@Test
+	void badInput() {
+		UrlToShorten urlToShorten = new UrlToShorten();
+
+		ResponseEntity<UrlToShorten> response = this.urlController.shorten(urlToShorten);
+		assert(response.getStatusCode().is4xxClientError());
+		assert(response.getStatusCode() == HttpStatus.BAD_REQUEST);
+	}
 }

@@ -2,6 +2,7 @@ package com.tximpact.urlshortenr.service;
 
 import com.tximpact.urlshortenr.entity.UrlToShorten;
 import com.tximpact.urlshortenr.repository.UrlRepository;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class UrlService {
             if (!matches.isEmpty()) {
                 List<String> matchingFullUrls = matches.stream().map(UrlToShorten::getFullUrl).toList();
                 if (!matchingFullUrls.contains(urlToShorten.getFullUrl())) {
-                    throw new Exception("ALready Taken");
+                    throw new EntityExistsException("ALready Taken");
                 }
             }
         }
